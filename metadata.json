@@ -1,0 +1,6 @@
+{
+  "name": "Restaurante Río Chico Menu",
+  "description": "Menú Digital para Restaurante Río Chico, especialistas en Parrilla Premium y comida tradicional tarijeña.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
