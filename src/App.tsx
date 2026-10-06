@@ -45,7 +45,7 @@ export default function App() {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = item.quantity + delta;
-        return newQty > 0 ? { ...item, quantity: newQty } : item;
+        return { ...item, quantity: newQty };
       }
       return item;
     }).filter(item => item.quantity > 0));
@@ -84,7 +84,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white p-4 pb-32">
+    <div className="min-h-screen bg-[#121212] text-white p-4 pb-[350px]">
       {/* Header */}
       <header className="mb-6 flex flex-col items-center text-center">
         <Utensils className="size-16 text-[#d97706] mb-2" />
@@ -159,7 +159,7 @@ export default function App() {
 
       {/* Sticky Cart */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-[#1e1e1e] border-t border-[#333] p-4 flex flex-col gap-3">
+        <div className="fixed bottom-0 left-0 w-full bg-[#1e1e1e] border-t border-[#333] p-4 flex flex-col gap-3 shadow-lg z-50">
           <div className="flex justify-between items-center">
             <span className="font-bold">Total: {cartTotal} Bs</span>
             <div className="flex gap-2">
@@ -169,14 +169,14 @@ export default function App() {
               </button>
             </div>
           </div>
-          <div className="max-h-32 overflow-y-auto">
+          <div className="max-h-48 overflow-y-auto pr-2">
             {cart.map(item => (
-              <div key={item.id} className="flex justify-between items-center text-sm mb-1">
+              <div key={item.id} className="flex justify-between items-center text-sm mb-2 border-b border-[#333] pb-1">
                 <span>{item.name} x{item.quantity}</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => updateQuantity(item.id, -1)}><Minus size={16} /></button>
-                  <button onClick={() => updateQuantity(item.id, 1)}><Plus size={16} /></button>
-                  <button onClick={() => updateQuantity(item.id, -item.quantity)} className="text-red-500"><Trash2 size={16} /></button>
+                  <button onClick={() => updateQuantity(item.id, -1)} className="p-1"><Minus size={16} /></button>
+                  <button onClick={() => updateQuantity(item.id, 1)} className="p-1"><Plus size={16} /></button>
+                  <button onClick={() => updateQuantity(item.id, -item.quantity)} className="text-red-500 p-2 cursor-pointer hover:bg-red-900/20 rounded-full"><Trash2 size={16} /></button>
                 </div>
               </div>
             ))}
