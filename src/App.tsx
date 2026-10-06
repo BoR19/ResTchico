@@ -72,6 +72,11 @@ export default function App() {
     
     saveOrder();
     window.open(`https://wa.me/59170000000?text=${message}`, '_blank');
+    setCart([]); // Clear cart after sending
+  };
+
+  const clearCart = () => {
+    setCart([]);
   };
 
   const reorder = (orderItems: CartItem[]) => {
@@ -157,9 +162,12 @@ export default function App() {
         <div className="fixed bottom-0 left-0 w-full bg-[#1e1e1e] border-t border-[#333] p-4 flex flex-col gap-3">
           <div className="flex justify-between items-center">
             <span className="font-bold">Total: {cartTotal} Bs</span>
-            <button onClick={sendOrderToWhatsApp} className="flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg font-bold">
-              <MessageCircle size={20} /> Pedir
-            </button>
+            <div className="flex gap-2">
+              <button onClick={clearCart} className="text-gray-400 p-2"><Trash2 size={20} /></button>
+              <button onClick={sendOrderToWhatsApp} className="flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg font-bold">
+                <MessageCircle size={20} /> Pedir
+              </button>
+            </div>
           </div>
           <div className="max-h-32 overflow-y-auto">
             {cart.map(item => (
