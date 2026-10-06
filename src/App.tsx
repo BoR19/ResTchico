@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { ShoppingCart, Search, Minus, Plus, Trash2, MessageCircle, Utensils, Clock, RotateCcw } from 'lucide-react';
 import { menuItems, Product, Category } from './menuData';
+import { db } from './firebase';
+import { collection, addDoc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 type CartItem = Product & { quantity: number };
 
@@ -20,8 +22,11 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('Especialidades');
 
   React.useEffect(() => {
-    const saved = localStorage.getItem('rioChicoRecentOrders');
-    if (saved) setRecentOrders(JSON.parse(saved));
+    const q = query(collection(db, 'recentOrders'), orderBy('timestamp', 'desc'), limit(5));
+    return onSnapshot(q, (snapshot) => {
+      const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      setRecentOrders(orders);
+    });
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -53,16 +58,13 @@ export default function App() {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const saveOrder = () => {
-    const newOrder: Order = {
-      id: Date.now().toString(),
+  const saveOrder = async () => {
+    const newOrder: Omit<Order, 'id'> = {
       items: [...cart],
       total: cartTotal,
       timestamp: Date.now(),
     };
-    const updatedOrders = [newOrder, ...recentOrders].slice(0, 5);
-    localStorage.setItem('rioChicoRecentOrders', JSON.stringify(updatedOrders));
-    setRecentOrders(updatedOrders);
+    await addDoc(collection(db, 'recentOrders'), newOrder);
   };
 
   const sendOrderToWhatsApp = () => {
