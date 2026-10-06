@@ -1,15 +1,28 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingCart, Search, Minus, Plus, Trash2, MessageCircle, Utensils } from 'lucide-react';
+import { ShoppingCart, Search, Minus, Plus, Trash2, MessageCircle, Utensils, Clock, RotateCcw } from 'lucide-react';
 import { menuItems, Product, Category } from './menuData';
 
 type CartItem = Product & { quantity: number };
+
+interface Order {
+  id: string;
+  items: CartItem[];
+  total: number;
+  timestamp: number;
+}
 
 const CATEGORIES: Category[] = ['Especialidades', 'Parrilla', 'Picantes', 'Sopas', 'Pescados', 'Vinos', 'Cervezas', 'Bebidas'];
 
 export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category>('Especialidades');
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('rioChicoRecentOrders');
+    if (saved) setRecentOrders(JSON.parse(saved));
+  }, []);
 
   const filteredItems = useMemo(() => {
     return menuItems.filter(item => 
@@ -40,11 +53,29 @@ export default function App() {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  const saveOrder = () => {
+    const newOrder: Order = {
+      id: Date.now().toString(),
+      items: [...cart],
+      total: cartTotal,
+      timestamp: Date.now(),
+    };
+    const updatedOrders = [newOrder, ...recentOrders].slice(0, 5);
+    localStorage.setItem('rioChicoRecentOrders', JSON.stringify(updatedOrders));
+    setRecentOrders(updatedOrders);
+  };
+
   const sendOrderToWhatsApp = () => {
     const message = `*Pedido Restaurante Río Chico*%0A%0A` +
       cart.map(item => `- ${item.name} (x${item.quantity}): ${item.price * item.quantity} Bs`).join('%0A') +
       `%0A%0A*Total: ${cartTotal} Bs*`;
+    
+    saveOrder();
     window.open(`https://wa.me/59170000000?text=${message}`, '_blank');
+  };
+
+  const reorder = (orderItems: CartItem[]) => {
+    setCart(orderItems);
   };
 
   return (
@@ -80,6 +111,25 @@ export default function App() {
           </button>
         ))}
       </div>
+
+      {/* Recent Orders */}
+      {recentOrders.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2"><Clock className="text-[#d97706]" /> Recientes</h2>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {recentOrders.map(order => (
+              <button
+                key={order.id}
+                onClick={() => reorder(order.items)}
+                className="bg-[#1e1e1e] p-3 rounded-lg text-sm border border-[#333] whitespace-nowrap"
+              >
+                {new Date(order.timestamp).toLocaleDateString()} - {order.total} Bs
+                <RotateCcw size={14} className="inline ml-2 text-[#d97706]" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Menu Grid */}
       <div className="grid gap-4">
